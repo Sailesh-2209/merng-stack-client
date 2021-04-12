@@ -45,7 +45,7 @@ export default function PostForm() {
         getPosts: [result.data.createPost, ...data.getPosts],
       };
       console.log(newData);
-      proxy.writeQuery({ query, newData });
+      proxy.writeQuery({ query, data: newData });
       values.body = "";
     },
     onError() {
