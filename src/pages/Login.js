@@ -2,22 +2,11 @@ import React, { useState } from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/client";
 import { Form, Button } from "semantic-ui-react";
+import { useForm } from "../utils/hooks";
 
-const REGISTER_USER = gql`
-  mutation register(
-    $username: String!
-    $email: String!
-    $password: String!
-    $confirmPassword: String!
-  ) {
-    register(
-      registerInput: {
-        username: $username
-        email: $email
-        password: $password
-        confirmPassword: $confirmPassword
-      }
-    ) {
+const LOGIN_USER = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
       id
       email
       username
@@ -27,43 +16,31 @@ const REGISTER_USER = gql`
   }
 `;
 
-function Register(props) {
-  const [errors, setErrors] = useState({});
-  const [values, setValues] = useState({
+function Login(props) {
+  const { onChange, onSubmit, values } = useForm(loginUserCallback, {
     username: "",
-    email: "",
     password: "",
-    confirmPassword: "",
   });
+  const [errors, setErrors] = useState({});
 
-  const [addUser, { loading }] = useMutation(REGISTER_USER, {
+  const [loginUser, { loading }] = useMutation(LOGIN_USER, {
     update(_, result) {
-      console.log(result);
       props.history.push("/");
     },
     onError(err) {
-      console.log(err.graphQLErrors[0].extensions.exception.errors);
       setErrors(err.graphQLErrors[0].extensions.exception.errors);
     },
     variables: values,
   });
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    addUser();
-  };
-
-  const onChange = (e) => {
-    setValues({
-      ...values,
-      [e.target.name]: e.target.value,
-    });
-  };
+  function loginUserCallback() {
+    loginUser();
+  }
 
   return (
     <div className="form-container">
       <Form onSubmit={onSubmit} noValidate className={loading ? "loading" : ""}>
-        <h1>Register</h1>
+        <h1>Login</h1>
         <Form.Input
           label="Username"
           name="username"
@@ -74,15 +51,6 @@ function Register(props) {
           error={errors.username ? true : false}
         />
         <Form.Input
-          label="Email"
-          name="email"
-          placeholder="Email"
-          value={values.email}
-          onChange={onChange}
-          type="email"
-          error={errors.email ? true : false}
-        />
-        <Form.Input
           label="Password"
           name="password"
           placeholder="Password"
@@ -91,17 +59,8 @@ function Register(props) {
           type="password"
           error={errors.password ? true : false}
         />
-        <Form.Input
-          label="Confirm Password"
-          name="confirmPassword"
-          placeholder="Password"
-          value={values.confirmPasword}
-          onChange={onChange}
-          type="password"
-          error={errors.confirmPassword ? true : false}
-        />
         <Button type="submit" color="red">
-          Register
+          Login
         </Button>
       </Form>
       {Object.keys(errors).length > 0 && (
@@ -117,4 +76,4 @@ function Register(props) {
   );
 }
 
-export default Register;
+export default Login;
