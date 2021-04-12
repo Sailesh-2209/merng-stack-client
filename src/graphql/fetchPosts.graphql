@@ -1,0 +1,19 @@
+query {
+  getPosts {
+    id
+    body
+    username
+    createdAt
+    likeCount
+    likes {
+      username
+    }
+    commentCount
+    comments {
+      id
+      username
+      createdAt
+      body
+    }
+  }
+}
