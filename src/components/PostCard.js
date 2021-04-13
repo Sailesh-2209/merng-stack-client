@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { Card, Image, Icon, Label, Button } from "semantic-ui-react";
+import { src } from "../images/hackerman";
 
 import { AuthContext } from "../context/auth";
 import LikeButton from "./LikeButton";
@@ -18,7 +19,8 @@ export default function PostCard({
         <Image
           floated="right"
           size="mini"
-          src="https://react.semantic-ui.com/images/avatar/large/molly.png"
+          src={src}
+          style={{ height: "5em", width: "5em" }}
         />
         <Card.Header>{username}</Card.Header>
         <Card.Meta as={Link} to={`/posts/${id}`}>

@@ -4,13 +4,24 @@ import { useMutation } from "@apollo/client";
 import { loader } from "graphql.macro";
 
 const DELETE_POST_MUTATION = loader("../graphql/deletePost.graphql");
+const FETCH_POST_QUERY = loader("../graphql/fetchPosts.graphql");
 
-export default function DeleteButton({ postId }) {
+export default function DeleteButton({ postId, callback }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [deletePost] = useMutation(DELETE_POST_MUTATION, {
-    update() {
+    update(proxy) {
       setConfirmOpen(false);
+      if (callback) {
+        callback();
+      }
+      const data = proxy.readQuery({ query: FETCH_POST_QUERY });
+      let newData;
+      newData = {
+        ...data,
+        getPosts: data.getPosts.filter((item) => item.id !== postId),
+      };
+      proxy.writeQuery({ query: FETCH_POST_QUERY, data: newData });
     },
     variables: {
       postId,
