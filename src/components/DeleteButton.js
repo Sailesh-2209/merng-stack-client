@@ -4,27 +4,32 @@ import { useMutation } from "@apollo/client";
 import { loader } from "graphql.macro";
 
 const DELETE_POST_MUTATION = loader("../graphql/deletePost.graphql");
+const DELETE_COMMENT_MUTATION = loader("../graphql/deleteComment.graphql");
 const FETCH_POST_QUERY = loader("../graphql/fetchPosts.graphql");
 
-export default function DeleteButton({ postId, callback }) {
+export default function DeleteButton({ postId, callback, commentId }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const mutation = commentId ? DELETE_COMMENT_MUTATION : DELETE_POST_MUTATION;
 
-  const [deletePost] = useMutation(DELETE_POST_MUTATION, {
+  const [deletePostOrMutation] = useMutation(mutation, {
     update(proxy) {
       setConfirmOpen(false);
       if (callback) {
         callback();
       }
-      const data = proxy.readQuery({ query: FETCH_POST_QUERY });
-      let newData;
-      newData = {
-        ...data,
-        getPosts: data.getPosts.filter((item) => item.id !== postId),
-      };
-      proxy.writeQuery({ query: FETCH_POST_QUERY, data: newData });
+      if (!commentId) {
+        const data = proxy.readQuery({ query: FETCH_POST_QUERY });
+        let newData;
+        newData = {
+          ...data,
+          getPosts: data.getPosts.filter((item) => item.id !== postId),
+        };
+        proxy.writeQuery({ query: FETCH_POST_QUERY, data: newData });
+      }
     },
     variables: {
       postId,
+      commentId,
     },
     onError(error) {
       console.log(error);
@@ -44,7 +49,7 @@ export default function DeleteButton({ postId, callback }) {
       <Confirm
         open={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => deletePost()}
+        onConfirm={() => deletePostOrMutation()}
       />
     </>
   );
